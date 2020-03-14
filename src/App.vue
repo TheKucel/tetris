@@ -15,22 +15,26 @@
 export default {
     data(){
         return{
-            rows: 17,
+            rows: 16,
             colums: 10,
             elements:[],
             delta: 0,
-            objects:{
-                qube:{
+            objects:[
+                {
                     width: 2,
                     height: 2
+                },
+                {
+                    width: 4,
+                    height: 1
                 }
-            },
+            ],
             currentFigure: {}
         }
     },
     methods:{
         createFigure(){
-            let fP = this.objects.qube;
+            let fP = this.objects[1];
             this.currentFigure = fP;
             for(let i = 0; i < fP.height; i++){
                 for(let j = this.marginCalc; j < fP.width+this.marginCalc; j++){
@@ -48,15 +52,15 @@ export default {
             }
         },
         moveFigure(){
-            let speed = 500;
+            let speed = 100;
             let way = 1;
-            let fP = this.objects.qube;
+            let fP = this.objects[1];
             this.currentFigure = fP;
             let interval = setInterval(()=>{
                 for(let i = way; i < fP.height+way; i++){
                     let elMass = this.elements;
-                    if(elMass[i-2] != undefined && this.rows-1 > way){
-                        this.elements[i-2].mass = elMass[i-1].mass.map((i)=>{return {key : i.key,style: ""}});
+                    if(elMass[i-fP.height] != undefined && this.rows-(fP.height-1) > way){
+                        this.elements[i-fP.height].mass = elMass[i-fP.height].mass.map((i)=>{return {key : i.key,style: ""}});
                     }
                     if(elMass[i-1] != undefined && this.rows-1 > way){
                         for (let z = this.marginCalc+fP.width; z < this.colums; z++){
@@ -67,7 +71,9 @@ export default {
                         }
                     }
                     if(elMass[i+1] != undefined && this.rows-1 > way){
-                        console.log(elMass[i+1].mass.some((i)=>{return i.style == ""}));
+                        let nextRow = [...elMass[i+1].mass];
+                        nextRow = nextRow.splice(this.marginCalc,fP.width);
+                        console.log(nextRow);
                     }
                     for(let j = this.marginCalc; j < fP.width+this.marginCalc; j++){
                         if(this.elements[i] == undefined){
@@ -76,8 +82,18 @@ export default {
                         this.elements[i].mass[j].style = ' created';
                     }
                 }
-                if(this.rows-2 > way){
+                if(this.rows-1 > way){
                     way++;
+                }
+                else{
+                    for(let x of this.elements){
+                        for(let y of x.mass){
+                            if(y.style == " created"){
+                                y.style = " grounded";
+                            }
+                        }
+                    }
+                    clearInterval(interval);
                 }
             },speed);
         },
@@ -113,7 +129,7 @@ export default {
 }
 body{
   width: 100%;
-  height: 100vh;
+  height: 100%;
 }
 #app {
   font-family: Avenir, Helvetica, Arial, sans-serif;
@@ -133,7 +149,7 @@ body{
 }
 .tetris-block{
   width: 450px;
-  height: 800px;
+  height: 760px;
   background: rgb(141, 141, 141);
 }
 .tetris-row{
@@ -146,7 +162,7 @@ body{
   margin: 1px;
   background: rgb(119, 119, 119);
 }
-.created{
+.created,.grounded{
     background: rgb(184, 184, 184);
 }
 </style>
